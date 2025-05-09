@@ -39,9 +39,38 @@ resource "aws_iam_role" "lambda_role" {
 EOF
 }
 
+resource "aws_iam_policy" "s3_bucket_policy" {
+    name        = "s3-bucket-policy"
+    description = "Allows read and write access to S3 buckets"
+
+    policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::bucket-store-j09/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::bucket-store-j09"
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
-  policy_arn = aws_s3_bucket_policy.s3_bucket_policy.arn
+  policy_arn = aws_iam_policy.s3_bucket_policy.arn
 }
 
 resource "aws_s3_bucket_notification" "lambda_trigger" {
